@@ -8,35 +8,32 @@
 #include <queueutil_export.h>
 #include <stdint.h>
 
-template <typename T, typename Container = std::deque<T>> class iterable_queue : public std::queue<T, Container>
-{
+template <typename T, typename Container = std::deque<T>> class iterable_queue : public std::queue<T, Container> {
 public:
-  typedef typename Container::iterator iterator;
+  typedef typename Container::iterator       iterator;
   typedef typename Container::const_iterator const_iterator;
 
-  iterator begin() { return this->c.begin(); }
-  iterator end() { return this->c.end(); }
+  iterator       begin() { return this->c.begin(); }
+  iterator       end() { return this->c.end(); }
   const_iterator begin() const { return this->c.begin(); }
   const_iterator end() const { return this->c.end(); }
 };
 
-template <typename T, uint32_t SIZE> class QUEUEUTIL_EXPORT buffer_queue
-{
+template <typename T, uint32_t SIZE> class QUEUEUTIL_EXPORT buffer_queue {
   static_assert(SIZE && !(SIZE & (SIZE - 1)), "SIZE must be a power of 2");
 
 private:
   // std::vector<T> _block;
-  std::vector<T*> _block;
-  std::mutex _write_q_mutex;
+  std::vector<T*>         _block;
+  std::mutex              _write_q_mutex;
   std::condition_variable _write_q_available;
-  std::mutex _read_q_mutex;
+  std::mutex              _read_q_mutex;
   std::condition_variable _read_q_available;
-  iterable_queue<T*> _writable_q;
-  iterable_queue<T*> _readable_q;
+  iterable_queue<T*>      _writable_q;
+  iterable_queue<T*>      _readable_q;
 
 public:
-  buffer_queue()
-  {
+  buffer_queue() {
     // _block.resize(SIZE);
     for (int i = 0; i < SIZE; i++) {
       //  _writable_q.push(&_block[i]);
@@ -47,16 +44,14 @@ public:
 
   buffer_queue(buffer_queue const& other) = delete;
 
-  ~buffer_queue()
-  {
+  ~buffer_queue() {
     reset();
     for (int i = 0; i < SIZE; i++) {
       delete _block[i];
     }
   }
 
-  void reset()
-  {
+  void reset() {
     // _write_reset();
     // _read_reset();
     // T* t = nullptr;
@@ -78,9 +73,8 @@ public:
     }
   }
 
-  T* get_writable_buffer(int wait_milli_sec = 10)
-  {
-    T* t = nullptr;
+  T* get_writable_buffer(int wait_milli_sec = 10) {
+    T*                           t = nullptr;
     std::unique_lock<std::mutex> lock_write(_write_q_mutex);
     if (_write_q_available.wait_for(lock_write, std::chrono::milliseconds(wait_milli_sec),
                                     [this] { return (!_writable_q.empty()); })) {
@@ -90,8 +84,7 @@ public:
     return t;
   }
 
-  void commit_write(T* buf_ptr)
-  {
+  void commit_write(T* buf_ptr) {
     std::lock_guard<std::mutex> lock_read(_read_q_mutex);
     if (nullptr == buf_ptr) {
       return;
@@ -118,9 +111,8 @@ public:
     _read_q_available.notify_one();
   }
 
-  T* get_readble_buffer(int wait_milli_sec = 10)
-  {
-    T* t = nullptr;
+  T* get_readble_buffer(int wait_milli_sec = 10) {
+    T*                           t = nullptr;
     std::unique_lock<std::mutex> lock_read(_read_q_mutex);
     if (_read_q_available.wait_for(lock_read, std::chrono::milliseconds(wait_milli_sec),
                                    [this] { return (!_readable_q.empty()); })) {
@@ -130,8 +122,7 @@ public:
     return t;
   }
 
-  void commit_read(T* buf_ptr)
-  {
+  void commit_read(T* buf_ptr) {
     std::lock_guard<std::mutex> lock_write(_write_q_mutex);
     if (nullptr == buf_ptr) {
       return;
