@@ -23,7 +23,9 @@ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
 list(APPEND COMPONENT1_PUBLIC_HEADERS
+	include/queueutil.h
 	include/buffer_queue.h
+	include/raw_buffer.h
 	${PROJECT_BINARY_DIR}/${COMPONENT1}_export.h
 	${PROJECT_BINARY_DIR}/version.h)
 
