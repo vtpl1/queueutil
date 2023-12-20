@@ -35,6 +35,10 @@ add_library(${COMPONENT1}
 	src/raw_buffer.cpp
 )
 
+target_compile_features(${COMPONENT1}
+	PUBLIC cxx_std_17
+)
+
 target_compile_definitions(${COMPONENT1}
 	PUBLIC VTPL_COMPILED_LIB
 )
