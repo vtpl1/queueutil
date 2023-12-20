@@ -66,36 +66,6 @@ set_target_properties(
 		SOVERSION	${PROJECT_VERSION_MAJOR}
 		VERSION ${PROJECT_VERSION})
 
-find_package(Git)
-if(Git_FOUND)
-    execute_process(COMMAND ${GIT_EXECUTABLE} describe --always --abbrev=40
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE GIT_COMMIT_HASH)
-    message(STATUS gch: ${GIT_COMMIT_HASH})
-    target_compile_definitions(${COMPONENT1}
-        PRIVATE GIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
-
-    execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE GIT_COMMIT_BRANCH)
-    message(STATUS gbr: ${GIT_COMMIT_BRANCH})
-    target_compile_definitions(${COMPONENT1}
-        PRIVATE GIT_COMMIT_BRANCH="${GIT_COMMIT_BRANCH}")
-
-    # the date of the commit
-    execute_process(COMMAND ${GIT_EXECUTABLE} log -1 --format=%ad --date=local
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET OUTPUT_VARIABLE GIT_COMMIT_DATE)
-    target_compile_definitions(${COMPONENT1}
-        PRIVATE GIT_COMMIT_DATE="${GIT_COMMIT_DATE}")
-	set(GIT_DETAILS "${GIT_COMMIT_BRANCH}_${GIT_COMMIT_HASH}_[${GIT_COMMIT_DATE}]")
-	target_compile_definitions(${COMPONENT1}
-        PRIVATE GIT_DETAILS="${GIT_DETAILS}")
-	message(STATUS git_details: ${GIT_DETAILS})
-endif() #git
-
-
-
 ## Install library + targets ##################################################
 include(CMakePackageConfigHelpers)
 
