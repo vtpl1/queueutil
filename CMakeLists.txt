@@ -3,7 +3,7 @@
 # *****************************************************
 cmake_minimum_required(VERSION 3.15)
 
-set(VERSION 1.0.3)
+set(VERSION 1.0.6)
 
 project(queueutil
 	VERSION ${VERSION}
@@ -23,7 +23,9 @@ set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
 
 list(APPEND COMPONENT1_PUBLIC_HEADERS
+	include/queueutil.h
 	include/buffer_queue.h
+	include/raw_buffer.h
 	${PROJECT_BINARY_DIR}/${COMPONENT1}_export.h
 	${PROJECT_BINARY_DIR}/version.h)
 
@@ -31,6 +33,10 @@ list(APPEND COMPONENT1_PUBLIC_HEADERS
 add_library(${COMPONENT1}
     src/queueutil.cpp
 	src/raw_buffer.cpp
+)
+
+target_compile_features(${COMPONENT1}
+	PUBLIC cxx_std_17
 )
 
 target_compile_definitions(${COMPONENT1}
@@ -63,36 +69,6 @@ set_target_properties(
 	${COMPONENT1} PROPERTIES
 		SOVERSION	${PROJECT_VERSION_MAJOR}
 		VERSION ${PROJECT_VERSION})
-
-find_package(Git)
-if(Git_FOUND)
-    execute_process(COMMAND ${GIT_EXECUTABLE} describe --always --abbrev=40
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE GIT_COMMIT_HASH)
-    message(STATUS gch: ${GIT_COMMIT_HASH})
-    target_compile_definitions(${COMPONENT1}
-        PRIVATE GIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
-
-    execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE GIT_COMMIT_BRANCH)
-    message(STATUS gbr: ${GIT_COMMIT_BRANCH})
-    target_compile_definitions(${COMPONENT1}
-        PRIVATE GIT_COMMIT_BRANCH="${GIT_COMMIT_BRANCH}")
-
-    # the date of the commit
-    execute_process(COMMAND ${GIT_EXECUTABLE} log -1 --format=%ad --date=local
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET OUTPUT_VARIABLE GIT_COMMIT_DATE)
-    target_compile_definitions(${COMPONENT1}
-        PRIVATE GIT_COMMIT_DATE="${GIT_COMMIT_DATE}")
-	set(GIT_DETAILS "${GIT_COMMIT_BRANCH}_${GIT_COMMIT_HASH}_[${GIT_COMMIT_DATE}]")
-	target_compile_definitions(${COMPONENT1}
-        PRIVATE GIT_DETAILS="${GIT_DETAILS}")
-	message(STATUS git_details: ${GIT_DETAILS})
-endif() #git
-
-
 
 ## Install library + targets ##################################################
 include(CMakePackageConfigHelpers)
