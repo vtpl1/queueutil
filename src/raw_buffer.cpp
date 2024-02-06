@@ -4,7 +4,9 @@
 
 #include "raw_buffer.h"
 
+#include <cstdint>
 #include <cstring>
+#include <memory>
 #include <stdexcept>
 
 constexpr int MEMORY_ALIGNMENT = 32;
