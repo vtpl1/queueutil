@@ -12,6 +12,9 @@ project(queueutil
 	LANGUAGES CXX)
 set(COMPONENT1 queueutil)
 
+# find_package(Catch2 3 REQUIRED)
+# find_package (Threads REQUIRED)
+
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 set(CMAKE_CXX_CLANG_TIDY
 	clang-tidy;)
@@ -26,6 +29,7 @@ list(APPEND COMPONENT1_PUBLIC_HEADERS
 	include/queueutil.h
 	include/buffer_queue.h
 	include/raw_buffer.h
+	include/queue_manager.h
 	${PROJECT_BINARY_DIR}/${COMPONENT1}_export.h
 	${PROJECT_BINARY_DIR}/version.h)
 
@@ -49,6 +53,17 @@ target_compile_definitions(${COMPONENT1}
 add_library(${PROJECT_NAME}::${COMPONENT1} ALIAS ${COMPONENT1})
 
 configure_file(inc/version.h.in version.h)
+
+# These tests can use the Catch2-provided main
+# add_executable(tests
+#	test/tests.cpp
+#)
+
+#target_link_libraries(tests
+#	PRIVATE Threads::Threads
+#	PRIVATE Catch2::Catch2WithMain
+#	PRIVATE queueutil
+#)
 
 include(GenerateExportHeader)
 generate_export_header(${COMPONENT1})
