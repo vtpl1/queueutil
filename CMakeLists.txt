@@ -12,8 +12,8 @@ project(queueutil
 	LANGUAGES CXX)
 set(COMPONENT1 queueutil)
 
-# find_package(Catch2 3 REQUIRED)
-# find_package (Threads REQUIRED)
+find_package(Catch2 REQUIRED)
+find_package(absl REQUIRED)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 set(CMAKE_CXX_CLANG_TIDY
@@ -55,15 +55,14 @@ add_library(${PROJECT_NAME}::${COMPONENT1} ALIAS ${COMPONENT1})
 configure_file(inc/version.h.in version.h)
 
 # These tests can use the Catch2-provided main
-# add_executable(tests
-#	test/tests.cpp
-#)
+add_executable(tests
+	test/tests.cpp
+)
 
-#target_link_libraries(tests
-#	PRIVATE Threads::Threads
-#	PRIVATE Catch2::Catch2WithMain
-#	PRIVATE queueutil
-#)
+target_link_libraries(tests
+	PRIVATE Catch2::Catch2WithMain
+	PRIVATE queueutil
+)
 
 include(GenerateExportHeader)
 generate_export_header(${COMPONENT1})
@@ -84,6 +83,10 @@ set_target_properties(
 	${COMPONENT1} PROPERTIES
 		SOVERSION	${PROJECT_VERSION_MAJOR}
 		VERSION ${PROJECT_VERSION})
+
+target_link_libraries(${COMPONENT1}
+	PUBLIC absl::strings
+)
 
 ## Install library + targets ##################################################
 include(CMakePackageConfigHelpers)

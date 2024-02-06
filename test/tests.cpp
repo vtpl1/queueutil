@@ -4,28 +4,27 @@
 
 #include <catch2/catch_test_macros.hpp>
 #include <cstdint>
-#include <thread>
-#include <vector>
 #include <memory>
+#include <vector>
 
 #include "queue_manager.h"
 
-void func() { /*auto queue = QueueManager<int, 2>::getInstance().get_queue("key");*/ }
-
 TEST_CASE("queue_manager", "[queue]") {
-  const uint64_t SIZE = 100000;
+  std::string pub_key = "pub[siteId:0,channelId:0,appId:-1,liveOrRec:1,streamType:0,startTs:-1]uuid:0";
+  std::string sub_key = "sub[siteId:0,channelId:0,appId:-1,liveOrRec:1,streamType:0,startTs:-1]uuid:0";
 
+  auto queue  = QueueManager<int, 2>::getInstance().get_queue(pub_key);
+  auto queue1 = QueueManager<int, 2>::getInstance().get_queue(sub_key);
 
-  std::vector<std::unique_ptr<std::thread>> threads;
+  auto keys = QueueManager<int, 2>::getInstance().get_keys("pub");
 
-  for (int i = 0; i < SIZE; i++) {
-    threads.emplace_back(std::make_unique<std::thread>(func));
-    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+  for (auto&& key : keys) {
+    std::cout << key << "\n";
   }
 
-  for (auto& thread : threads) {
-    if (thread->joinable()) {
-      thread->join();
-    }
+  auto keys1 = QueueManager<int, 2>::getInstance().get_keys("sub");
+
+  for (auto&& key : keys1) {
+    std::cout << key << "\n";
   }
 }

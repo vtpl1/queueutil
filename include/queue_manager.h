@@ -8,6 +8,7 @@
 
 #include "buffer_queue.h"
 
+#include <absl/strings/match.h>
 #include <atomic>
 #include <iostream>
 #include <map>
@@ -62,6 +63,23 @@ public:
   uint64_t get_src_uuid() { return 0; }
 
   uint64_t get_sink_uuid() { return uuid_generator_++; }
+
+  std::vector<std::string> get_keys(std::string type) {
+    std::vector<std::string> keys;
+    try {
+      std::lock_guard<std::mutex> lock(mutex_);
+      for (auto&& itr : queue_map_) {
+        std::string key = itr.first;
+        if (absl::StartsWithIgnoreCase(key, type)) {
+          keys.emplace_back(key);
+        }
+      }
+    } catch (const std::runtime_error& e) {
+      // std::cerr << e.what() << '\n';
+    }
+
+    return keys;
+  }
 };
 
 #endif // queue_manager_h
