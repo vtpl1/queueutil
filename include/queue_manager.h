@@ -60,18 +60,22 @@ public:
     return false;
   }
 
-  uint64_t get_src_uuid() { return 0; }
+  uint64_t get_pub_uuid() { return 0; }
 
-  uint64_t get_sink_uuid() { return uuid_generator_++; }
+  uint64_t get_sub_uuid() { return uuid_generator_++; }
 
-  std::vector<std::string> get_keys(std::string type) {
+  std::vector<std::string> get_keys(std::string type = std::string("")) {
     std::vector<std::string> keys;
     try {
       std::lock_guard<std::mutex> lock(mutex_);
       for (auto&& itr : queue_map_) {
         std::string key = itr.first;
-        if (absl::StartsWithIgnoreCase(key, type)) {
+        if (type == std::string("")) {
           keys.emplace_back(key);
+        } else {
+          if (absl::StartsWithIgnoreCase(key, type)) {
+            keys.emplace_back(key);
+          }
         }
       }
     } catch (const std::runtime_error& e) {

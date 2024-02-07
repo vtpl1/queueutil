@@ -16,7 +16,7 @@ TEST_CASE("queue_manager", "[queue]") {
   auto queue  = QueueManager<int, 2>::getInstance().get_queue(pub_key);
   auto queue1 = QueueManager<int, 2>::getInstance().get_queue(sub_key);
 
-  auto keys = QueueManager<int, 2>::getInstance().get_keys("pub");
+  auto keys = QueueManager<int, 2>::getInstance().get_keys();
 
   for (auto&& key : keys) {
     std::cout << key << "\n";
