@@ -73,7 +73,15 @@
         "execution": "cpp",
         "ios": "cpp",
         "locale": "cpp",
-        "queue": "cpp"
+        "queue": "cpp",
+        "clocale": "cpp",
+        "cstdarg": "cpp",
+        "map": "cpp",
+        "fstream": "cpp",
+        "iostream": "cpp",
+        "any": "cpp",
+        "__tree": "cpp",
+        "forward_list": "cpp"
     },
 
 }

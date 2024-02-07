@@ -22,19 +22,12 @@ private:
   std::mutex           mutex_;
   std::atomic_uint64_t uuid_generator_{0};
 
-public:
-  QueueManager() { std::cout << "QueueManager ctor\n"; };
-  ~QueueManager() { std::cout << "QueueManager dtor\n"; };
-
   static QueueManager& getInstance() {
     static QueueManager instance;
     return instance;
   }
 
-  QueueManager(QueueManager const&)   = delete;
-  void operator=(QueueManager const&) = delete;
-
-  std::shared_ptr<buffer_queue<T, size>> get_queue(std::string key) {
+  std::shared_ptr<buffer_queue<T, size>> get_queue_(std::string key) {
     try {
       std::lock_guard<std::mutex> lock(mutex_);
       if (queue_map_.find(key) == queue_map_.end()) {
@@ -48,7 +41,7 @@ public:
     return nullptr;
   }
 
-  bool remove_queue(std::string key) {
+  bool remove_queue_(std::string key) {
     try {
       std::lock_guard<std::mutex> lock(mutex_);
       queue_map_.erase(key);
@@ -60,11 +53,11 @@ public:
     return false;
   }
 
-  uint64_t get_src_uuid() { return 0; }
+  uint64_t get_src_uuid_() { return 0; }
 
-  uint64_t get_sink_uuid() { return uuid_generator_++; }
+  uint64_t get_sink_uuid_() { return uuid_generator_++; }
 
-  std::vector<std::string> get_keys(std::string type = std::string("")) {
+  std::vector<std::string> get_keys_(std::string type) {
     std::vector<std::string> keys;
     try {
       std::lock_guard<std::mutex> lock(mutex_);
@@ -84,6 +77,23 @@ public:
 
     return keys;
   }
+
+public:
+  QueueManager() { std::cout << "QueueManager ctor\n"; };
+  ~QueueManager() { std::cout << "QueueManager dtor\n"; };
+
+  QueueManager(QueueManager const&)   = delete;
+  void operator=(QueueManager const&) = delete;
+
+  static std::shared_ptr<buffer_queue<T, size>> get_queue(std::string key) { return getInstance().get_queue(key); }
+
+  static bool remove_queue(std::string key) { return getInstance().remove_queue_(key); }
+
+  static uint64_t get_src_uuid() { return getInstance().get_src_uuid_(); }
+
+  static uint64_t get_sink_uuid() { return getInstance().get_sink_uuid_(); }
+
+  static std::vector<std::string> get_keys(std::string type = std::string("")) { return getInstance().get_keys_(type); }
 };
 
 #endif // queue_manager_h
