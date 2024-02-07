@@ -43,7 +43,7 @@ public:
 
       return queue_map_.at(key);
     } catch (const std::runtime_error& e) {
-      // std::cerr << e.what() << '\n';
+      std::cout << e.what() << '\n';
     }
     return nullptr;
   }
@@ -55,14 +55,14 @@ public:
 
       return true;
     } catch (const std::runtime_error& e) {
-      // std::cerr << e.what() << '\n';
+      std::cout << e.what() << '\n';
     }
     return false;
   }
 
-  uint64_t get_pub_uuid() { return 0; }
+  uint64_t get_src_uuid() { return 0; }
 
-  uint64_t get_sub_uuid() { return uuid_generator_++; }
+  uint64_t get_sink_uuid() { return uuid_generator_++; }
 
   std::vector<std::string> get_keys(std::string type = std::string("")) {
     std::vector<std::string> keys;
@@ -79,7 +79,7 @@ public:
         }
       }
     } catch (const std::runtime_error& e) {
-      // std::cerr << e.what() << '\n';
+      std::cout << e.what() << '\n';
     }
 
     return keys;
