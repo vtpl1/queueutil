@@ -1,9 +1,9 @@
 {
   "name": "queueutil",
-  "version": "1.0.8",
+  "version": "1.0.10",
   "description": "Queue util",
   "homepage": "http://github.com/queueutil",
   "dependencies": [
-    "abseil", "catch2"
+    "abseil"
   ]
 }
