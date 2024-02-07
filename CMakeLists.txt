@@ -43,6 +43,13 @@ target_compile_features(${COMPONENT1}
 	PUBLIC cxx_std_17
 )
 
+
+if (MSVC)
+    target_compile_options(${COMPONENT1}
+        PUBLIC /Zc:__cplusplus
+    )
+endif()
+
 target_compile_definitions(${COMPONENT1}
 	PUBLIC VTPL_COMPILED_LIB
 )
