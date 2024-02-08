@@ -31,7 +31,7 @@ void RawBuffer::resize(size_t new_size) {
 
 RawBuffer::RawBuffer(const RawBuffer& other) { assign(other.data(), other.size()); }
 
-RawBuffer& RawBuffer::operator=(const RawBuffer& other) {
+auto RawBuffer::operator=(const RawBuffer& other) -> RawBuffer& {
   if (this == &other) {
     return *this;
   }
@@ -39,14 +39,14 @@ RawBuffer& RawBuffer::operator=(const RawBuffer& other) {
   return *this;
 }
 
-uint8_t* RawBuffer::data() const {
+auto RawBuffer::data() const -> uint8_t* {
   if (_buffer_size == 0) {
     return nullptr;
   }
   return _buffer.get();
 }
 
-uint8_t* RawBuffer::data(size_t offset) const {
+auto RawBuffer::data(size_t offset) const -> uint8_t*  {
   if (_buffer_size == 0) {
     return nullptr;
   }
@@ -56,16 +56,16 @@ uint8_t* RawBuffer::data(size_t offset) const {
   return (_buffer.get() + offset);
 }
 
-uint8_t* RawBuffer::end() const {
+auto RawBuffer::end() const -> uint8_t* {
   if (_buffer_size == 0) {
     return nullptr;
   }
   return (_buffer.get() + _buffer_size);
 }
 
-size_t RawBuffer::size() const { return _buffer_size; }
+auto RawBuffer::size() const -> size_t { return _buffer_size; }
 
-size_t RawBuffer::capacity() const { return _buffer_capacity; }
+auto RawBuffer::capacity() const -> size_t { return _buffer_capacity; }
 
 void RawBuffer::assign(uint8_t* data_in, size_t valid_data_size) {
   resize(valid_data_size);

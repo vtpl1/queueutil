@@ -32,4 +32,6 @@ public:
   size_t     capacity() const;
 };
 
+void QUEUEUTIL_EXPORT use_raw_buffer();
+
 #endif // raw_buffer_h

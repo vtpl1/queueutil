@@ -3,7 +3,7 @@
 # *****************************************************
 cmake_minimum_required(VERSION 3.15)
 
-set(VERSION 1.0.12)
+set(VERSION 1.0.13)
 
 project(queueutil
 	VERSION ${VERSION}
@@ -36,6 +36,7 @@ list(APPEND COMPONENT1_PUBLIC_HEADERS
 # set(BUILD_SHARED_LIBS TRUE)
 add_library(${COMPONENT1}
     src/queueutil.cpp
+	src/queue_manager.cpp
 	src/raw_buffer.cpp
 )
 
