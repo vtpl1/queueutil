@@ -86,7 +86,7 @@ public:
   QueueManager(QueueManager const&)   = delete;
   void operator=(QueueManager const&) = delete;
 
-  static std::shared_ptr<buffer_queue<T, size>> get_queue(std::string key) { return getInstance().get_queue(key); }
+  static std::shared_ptr<buffer_queue<T, size>> get_queue(std::string key) { return getInstance().get_queue_(key); }
 
   static bool remove_queue(std::string key) { return getInstance().remove_queue_(key); }
 
@@ -103,9 +103,6 @@ public:
   static std::shared_ptr<buffer_queue<RawBuffer, 1024>> get_queue(std::string key);
   static bool                                           remove_queue(std::string key);
 
-private:
-  QueueManager<RawBuffer, 1024> queue_manager_;
-  static QueueManagerRawBuffer& getInstance();
 };
 
 void QUEUEUTIL_EXPORT use_queue_manager();

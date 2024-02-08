@@ -81,7 +81,8 @@
         "iostream": "cpp",
         "any": "cpp",
         "__tree": "cpp",
-        "forward_list": "cpp"
+        "forward_list": "cpp",
+        "print": "cpp"
     },
 
 }

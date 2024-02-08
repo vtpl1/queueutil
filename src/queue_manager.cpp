@@ -3,21 +3,24 @@
 // *****************************************************
 
 #include "queue_manager.h"
+#include "buffer_queue.h"
+#include "raw_buffer.h"
 #include <string>
-#include <vector>
 #include <utility>
+#include <vector>
+#include <memory>
 
-auto QueueManagerRawBuffer::getInstance() -> QueueManagerRawBuffer& {
-  static QueueManagerRawBuffer instance;
-  return instance;
-}
+constexpr int MAX_QUEUE_SIZE = 1024;
+using QueueManagerRaw        = QueueManager<RawBuffer, MAX_QUEUE_SIZE>;
 
 auto QueueManagerRawBuffer::get_keys(std::string key) -> std::vector<std::string> {
-  return getInstance().queue_manager_.get_keys(std::move(key));
+  return QueueManagerRaw::get_keys(std::move(key));
+}
+
+auto QueueManagerRawBuffer::get_queue(std::string key) -> std::shared_ptr<buffer_queue<RawBuffer, MAX_QUEUE_SIZE>> {
+  return QueueManagerRaw::get_queue(std::move(key));
 }
 
 auto QueueManagerRawBuffer::remove_queue(std::string key) -> bool {
-  return getInstance().queue_manager_.remove_queue(std::move(key));
+  return QueueManagerRaw::remove_queue(std::move(key));
 }
-// static std::shared_ptr<buffer_queue<RawBuffer, 1024>> get_queue(std::string key);
-// static bool                                           remove_queue(std::string key);
