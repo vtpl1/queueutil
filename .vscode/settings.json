@@ -73,7 +73,9 @@
         "execution": "cpp",
         "ios": "cpp",
         "locale": "cpp",
-        "queue": "cpp"
+        "queue": "cpp",
+        "forward_list": "cpp",
+        "print": "cpp"
     },
 
 }

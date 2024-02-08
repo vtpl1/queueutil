@@ -152,5 +152,7 @@ public:
 
   int read_buffer_size() { return _readable_q.size(); }
 };
-void QUEUEUTIL_EXPORT buffer_queue_1();
+
+void QUEUEUTIL_EXPORT use_buffer_queue();
+
 #endif

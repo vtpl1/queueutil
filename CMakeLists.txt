@@ -36,6 +36,7 @@ list(APPEND COMPONENT1_PUBLIC_HEADERS
 # set(BUILD_SHARED_LIBS TRUE)
 add_library(${COMPONENT1}
     src/queueutil.cpp
+	src/queue_manager.cpp
 	src/raw_buffer.cpp
 )
 

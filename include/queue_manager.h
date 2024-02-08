@@ -8,6 +8,7 @@
 
 #include "buffer_queue.h"
 
+#include "raw_buffer.h"
 #include <absl/strings/match.h>
 #include <atomic>
 #include <iostream>
@@ -85,5 +86,18 @@ public:
     return keys;
   }
 };
+
+class QUEUEUTIL_EXPORT QueueManagerRawBuffer {
+public:
+  static std::vector<std::string>                       get_keys(std::string key = std::string(""));
+  static std::shared_ptr<buffer_queue<RawBuffer, 1024>> get_queue(std::string key);
+  static bool                                           remove_queue(std::string key);
+
+private:
+  QueueManager<RawBuffer, 1024> queue_manager_;
+  static QueueManagerRawBuffer& getInstance();
+};
+
+void QUEUEUTIL_EXPORT use_queue_manager();
 
 #endif // queue_manager_h
