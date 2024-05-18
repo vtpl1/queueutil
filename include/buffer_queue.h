@@ -7,6 +7,8 @@
 #include <queue>
 #include <queueutil_export.h>
 #include <stdint.h>
+#include <stdexcept>
+
 
 template <typename T, typename Container = std::deque<T>> class iterable_queue : public std::queue<T, Container> {
 public:
