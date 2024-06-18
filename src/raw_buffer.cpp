@@ -6,6 +6,7 @@
 
 #include <cstdint>
 #include <cstring>
+#include <cstddef>
 #include <memory>
 #include <stdexcept>
 
@@ -13,7 +14,7 @@ constexpr int MEMORY_ALIGNMENT = 32;
 
 RawBuffer::RawBuffer(bool resize_always) : RawBuffer(nullptr, 0, resize_always) {}
 
-RawBuffer::RawBuffer(uint8_t* data_in, size_t valid_data_size, bool resize_always) : _resize_always(resize_always) {
+RawBuffer::RawBuffer(const uint8_t* data_in, size_t valid_data_size, bool resize_always) : _resize_always(resize_always) {
   assign(data_in, valid_data_size);
 }
 
@@ -67,7 +68,7 @@ auto RawBuffer::size() const -> size_t { return _buffer_size; }
 
 auto RawBuffer::capacity() const -> size_t { return _buffer_capacity; }
 
-void RawBuffer::assign(uint8_t* data_in, size_t valid_data_size) {
+void RawBuffer::assign(const uint8_t* data_in, size_t valid_data_size) {
   resize(valid_data_size);
   std::memcpy(_buffer.get(), data_in, valid_data_size);
 }

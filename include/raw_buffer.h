@@ -5,6 +5,7 @@
 #pragma once
 #ifndef raw_buffer_h
 #define raw_buffer_h
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <queueutil_export.h>
@@ -16,11 +17,11 @@ private:
   size_t                     _buffer_capacity{0};
   size_t                     _buffer_size{0};
   bool                       _resize_always{false};
-  void                       assign(uint8_t* data_in, size_t valid_data_size);
+  void                       assign(const uint8_t* data_in, size_t valid_data_size);
 
 public:
   RawBuffer(bool resize_always = false);
-  RawBuffer(uint8_t* data_in, size_t valid_data_size, bool resize_always = false);
+  RawBuffer(const uint8_t* data_in, size_t valid_data_size, bool resize_always = false);
   ~RawBuffer() = default;
   RawBuffer(const RawBuffer& o);
   RawBuffer& operator=(const RawBuffer& o);
