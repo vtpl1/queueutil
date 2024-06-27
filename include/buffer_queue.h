@@ -1,14 +1,15 @@
 #pragma once
 #ifndef buffer_queue_h
 #define buffer_queue_h
+
 #include <condition_variable>
 #include <deque>
 #include <mutex>
 #include <queue>
 #include <queueutil_export.h>
-#include <stdint.h>
 #include <stdexcept>
-
+#include <stdint.h>
+#include <string>
 
 template <typename T, typename Container = std::deque<T>> class iterable_queue : public std::queue<T, Container> {
 public:
@@ -33,6 +34,10 @@ private:
   std::condition_variable _read_q_available;
   iterable_queue<T*>      _writable_q;
   iterable_queue<T*>      _readable_q;
+  std::mutex              write_discontinuity_mutex_;
+  bool                    write_discontinuity_{false};
+  std::mutex              associated_data_mutex_;
+  std::string             associated_data_{""};
 
 public:
   buffer_queue() {
@@ -153,6 +158,32 @@ public:
   int write_buffer_size() { return _writable_q.size(); }
 
   int read_buffer_size() { return _readable_q.size(); }
+
+  bool get_write_discontinuity() {
+    std::lock_guard<std::mutex> lock(write_discontinuity_mutex_);
+    return write_discontinuity_;
+  }
+  void set_write_discontinuity() {
+    std::lock_guard<std::mutex> lock(write_discontinuity_mutex_);
+    write_discontinuity_ = true;
+  }
+  void reset_write_discontinuity() {
+    std::lock_guard<std::mutex> lock(write_discontinuity_mutex_);
+    write_discontinuity_ = false;
+  }
+
+  std::string get_associated_data() {
+    std::lock_guard<std::mutex> lock(associated_data_mutex_);
+    return associated_data_;
+  }
+  void set_associated_data(const std::string& data) {
+    std::lock_guard<std::mutex> lock(associated_data_mutex_);
+    associated_data_ = data;
+  }
+  void reset_associated_data() {
+    std::lock_guard<std::mutex> lock(associated_data_mutex_);
+    associated_data_ = "";
+  }
 };
 
 void QUEUEUTIL_EXPORT use_buffer_queue();
