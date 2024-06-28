@@ -34,8 +34,10 @@ private:
   std::condition_variable _read_q_available;
   iterable_queue<T*>      _writable_q;
   iterable_queue<T*>      _readable_q;
-  std::mutex              write_discontinuity_mutex_;
-  bool                    write_discontinuity_{false};
+  std::mutex              associated_bool_mutex_;
+  bool                    associated_bool_{false};
+  std::mutex              associated_int_mutex_;
+  int64_t                 associated_int_{0};
   std::mutex              associated_data_mutex_;
   std::string             associated_data_{""};
 
@@ -159,17 +161,17 @@ public:
 
   int read_buffer_size() { return _readable_q.size(); }
 
-  bool get_write_discontinuity() {
-    std::lock_guard<std::mutex> lock(write_discontinuity_mutex_);
-    return write_discontinuity_;
+  bool get_associated_bool() {
+    std::lock_guard<std::mutex> lock(associated_bool_mutex_);
+    return associated_bool_;
   }
-  void set_write_discontinuity() {
-    std::lock_guard<std::mutex> lock(write_discontinuity_mutex_);
-    write_discontinuity_ = true;
+  void set_associated_bool() {
+    std::lock_guard<std::mutex> lock(associated_bool_mutex_);
+    associated_bool_ = true;
   }
-  void reset_write_discontinuity() {
-    std::lock_guard<std::mutex> lock(write_discontinuity_mutex_);
-    write_discontinuity_ = false;
+  void reset_associated_bool() {
+    std::lock_guard<std::mutex> lock(associated_bool_mutex_);
+    associated_bool_ = false;
   }
 
   std::string get_associated_data() {
@@ -183,6 +185,19 @@ public:
   void reset_associated_data() {
     std::lock_guard<std::mutex> lock(associated_data_mutex_);
     associated_data_ = "";
+  }
+
+  int64_t get_associated_int() {
+    std::lock_guard<std::mutex> lock(associated_int_mutex_);
+    return associated_int_;
+  }
+  void set_associated_int(int64_t data) {
+    std::lock_guard<std::mutex> lock(associated_int_mutex_);
+    associated_int_ = data;
+  }
+  void reset_associated_int() {
+    std::lock_guard<std::mutex> lock(associated_int_mutex_);
+    associated_int_ = 0;
   }
 };
 
