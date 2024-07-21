@@ -34,6 +34,8 @@ private:
   std::condition_variable _read_q_available;
   iterable_queue<T*>      _writable_q;
   iterable_queue<T*>      _readable_q;
+  std::mutex              should_block_mutex_;
+  bool                    should_block_{false};
   std::mutex              associated_bool_mutex_;
   bool                    associated_bool_{false};
   std::mutex              associated_int_mutex_;
@@ -157,9 +159,15 @@ public:
     _write_q_available.notify_one();
   }
 
-  int write_buffer_size() { return _writable_q.size(); }
+  int write_buffer_size() {
+    std::lock_guard<std::mutex> lock_write(_write_q_mutex);
+    return _writable_q.size();
+  }
 
-  int read_buffer_size() { return _readable_q.size(); }
+  int read_buffer_size() {
+    std::lock_guard<std::mutex> lock_read(_read_q_mutex);
+    return _readable_q.size();
+  }
 
   bool get_associated_bool() {
     std::lock_guard<std::mutex> lock(associated_bool_mutex_);
@@ -172,6 +180,19 @@ public:
   void reset_associated_bool() {
     std::lock_guard<std::mutex> lock(associated_bool_mutex_);
     associated_bool_ = false;
+  }
+
+  bool get_should_block() {
+    std::lock_guard<std::mutex> lock(should_block_mutex_);
+    return should_block_;
+  }
+  void set_should_block() {
+    std::lock_guard<std::mutex> lock(should_block_mutex_);
+    should_block_ = true;
+  }
+  void reset_should_block() {
+    std::lock_guard<std::mutex> lock(should_block_mutex_);
+    should_block_ = false;
   }
 
   std::string get_associated_data() {
