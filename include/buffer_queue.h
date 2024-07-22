@@ -169,6 +169,10 @@ public:
     return _readable_q.size();
   }
 
+  int get_size() { return read_buffer_size(); }
+
+  int is_sufficient_space_available() { return read_buffer_size() < SIZE / 2; }
+
   bool get_associated_bool() {
     std::lock_guard<std::mutex> lock(associated_bool_mutex_);
     return associated_bool_;
