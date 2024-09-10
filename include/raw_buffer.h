@@ -31,6 +31,7 @@ public:
   void       resize(size_t new_size);
   size_t     size() const;
   size_t     capacity() const;
+  void       append(const uint8_t* data_in, size_t data_size);
 };
 
 void QUEUEUTIL_EXPORT use_raw_buffer();

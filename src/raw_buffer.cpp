@@ -4,9 +4,9 @@
 
 #include "raw_buffer.h"
 
+#include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <cstddef>
 #include <memory>
 #include <stdexcept>
 
@@ -14,7 +14,8 @@ constexpr int MEMORY_ALIGNMENT = 32;
 
 RawBuffer::RawBuffer(bool resize_always) : RawBuffer(nullptr, 0, resize_always) {}
 
-RawBuffer::RawBuffer(const uint8_t* data_in, size_t valid_data_size, bool resize_always) : _resize_always(resize_always) {
+RawBuffer::RawBuffer(const uint8_t* data_in, size_t valid_data_size, bool resize_always)
+    : _resize_always(resize_always) {
   assign(data_in, valid_data_size);
 }
 
@@ -47,7 +48,7 @@ auto RawBuffer::data() const -> uint8_t* {
   return _buffer.get();
 }
 
-auto RawBuffer::data(size_t offset) const -> uint8_t*  {
+auto RawBuffer::data(size_t offset) const -> uint8_t* {
   if (_buffer_size == 0) {
     return nullptr;
   }
@@ -68,7 +69,16 @@ auto RawBuffer::size() const -> size_t { return _buffer_size; }
 
 auto RawBuffer::capacity() const -> size_t { return _buffer_capacity; }
 
-void RawBuffer::assign(const uint8_t* data_in, size_t valid_data_size) {
+auto RawBuffer::assign(const uint8_t* data_in, size_t valid_data_size) -> void {
   resize(valid_data_size);
   std::memcpy(_buffer.get(), data_in, valid_data_size);
+}
+
+auto RawBuffer::append(const uint8_t* data_in, size_t data_size) -> void {
+  const std::size_t          temp_size = _buffer_size;
+  std::unique_ptr<uint8_t[]> temp_buff = std::make_unique<uint8_t[]>(temp_size);
+  std::memcpy(temp_buff.get(), _buffer.get(), temp_size);
+  resize(temp_size + data_size);
+  std::memcpy(_buffer.get(), temp_buff.get(), temp_size);
+  std::memcpy(_buffer.get() + temp_size, data_in, data_size);
 }
