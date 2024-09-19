@@ -74,11 +74,12 @@ auto RawBuffer::assign(const uint8_t* data_in, size_t valid_data_size) -> void {
   std::memcpy(_buffer.get(), data_in, valid_data_size);
 }
 
+auto RawBuffer::take(const uint8_t* data_in, size_t valid_data_size) -> void { assign(data_in, valid_data_size); }
+
 auto RawBuffer::append(const uint8_t* data_in, size_t data_size) -> void {
-  const std::size_t          temp_size = _buffer_size;
-  std::unique_ptr<uint8_t[]> temp_buff = std::make_unique<uint8_t[]>(temp_size);
-  std::memcpy(temp_buff.get(), _buffer.get(), temp_size);
+  RawBuffer         temp_buff(data(), size());
+  const std::size_t temp_size = size();
   resize(temp_size + data_size);
-  std::memcpy(_buffer.get(), temp_buff.get(), temp_size);
+  std::memcpy(_buffer.get(), temp_buff.data(), temp_size);
   std::memcpy(_buffer.get() + temp_size, data_in, data_size);
 }
