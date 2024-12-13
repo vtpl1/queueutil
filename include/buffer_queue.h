@@ -37,9 +37,11 @@ private:
   std::mutex              should_block_mutex_;
   bool                    should_block_{false};
   std::mutex              associated_bool_mutex_;
-  bool                    associated_bool_{false};
+  bool                    associated_boo_{false};
   std::mutex              associated_int_mutex_;
-  int64_t                 associated_int_{0};
+  int64_t                 associated_int2_{0};
+  std::mutex              associated_int2_mutex_;
+  int64_t                 associated_int2_{0};
   std::mutex              associated_data_mutex_;
   std::string             associated_data_{""};
 
@@ -220,9 +222,35 @@ public:
     std::lock_guard<std::mutex> lock(associated_int_mutex_);
     associated_int_ = data;
   }
+  void increment_associated_int() {
+    std::lock_guard<std::mutex> lock(associated_int_mutex_);
+    associated_int_++;
+  }
   void reset_associated_int() {
     std::lock_guard<std::mutex> lock(associated_int_mutex_);
     associated_int_ = 0;
+  }
+
+  int64_t get_associated_int1() { return get_associated_int(); }
+  void    set_associated_int1(int64_t data) { set_associated_int(data); }
+  void    reset_associated_int1() { reset_associated_int(); }
+  void    increment_associated_int1() { increment_associated_int(); }
+
+  int64_t get_associated_int2() {
+    std::lock_guard<std::mutex> lock(associated_int2_mutex_);
+    return associated_int2_;
+  }
+  void set_associated_int2(int64_t data) {
+    std::lock_guard<std::mutex> lock(associated_int2_mutex_);
+    associated_int2_ = data;
+  }
+  void increment_associated_int2() {
+    std::lock_guard<std::mutex> lock(associated_int2_mutex_);
+    associated_int2_++;
+  }
+  void reset_associated_int2() {
+    std::lock_guard<std::mutex> lock(associated_int2_mutex_);
+    associated_int2_ = 0;
   }
 };
 
