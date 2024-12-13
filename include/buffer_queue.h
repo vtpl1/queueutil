@@ -37,9 +37,9 @@ private:
   std::mutex              should_block_mutex_;
   bool                    should_block_{false};
   std::mutex              associated_bool_mutex_;
-  bool                    associated_boo_{false};
+  bool                    associated_bool_{false};
   std::mutex              associated_int_mutex_;
-  int64_t                 associated_int2_{0};
+  int64_t                 associated_int_{0};
   std::mutex              associated_int2_mutex_;
   int64_t                 associated_int2_{0};
   std::mutex              associated_data_mutex_;
