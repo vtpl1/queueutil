@@ -42,6 +42,18 @@ private:
     return nullptr;
   }
 
+  std::shared_ptr<buffer_queue<T, size>> get_queue_if_exists_(std::string key) {
+    try {
+      std::lock_guard<std::mutex> lock(mutex_);
+      if (queue_map_.find(key) != queue_map_.end()) {
+        return queue_map_.at(key);
+      }
+    } catch (const std::runtime_error& e) {
+      std::cout << e.what() << '\n';
+    }
+    return nullptr;
+  }
+
   bool remove_queue_(std::string key) {
     try {
       std::lock_guard<std::mutex> lock(mutex_);
@@ -88,6 +100,10 @@ public:
 
   static std::shared_ptr<buffer_queue<T, size>> get_queue(std::string key) { return getInstance().get_queue_(key); }
 
+  static std::shared_ptr<buffer_queue<T, size>> get_queue_if_exists(std::string key) {
+    return getInstance().get_queue_if_exists_(key);
+  }
+
   static bool remove_queue(std::string key) { return getInstance().remove_queue_(key); }
 
   static uint64_t get_src_uuid() { return getInstance().get_src_uuid_(); }
@@ -101,8 +117,8 @@ class QUEUEUTIL_EXPORT QueueManagerRawBuffer {
 public:
   static std::vector<std::string>                       get_keys(std::string key = std::string(""));
   static std::shared_ptr<buffer_queue<RawBuffer, 1024>> get_queue(std::string key);
+  static std::shared_ptr<buffer_queue<RawBuffer, 1024>> get_queue_if_exists(std::string key);
   static bool                                           remove_queue(std::string key);
-
 };
 
 void QUEUEUTIL_EXPORT use_queue_manager();
