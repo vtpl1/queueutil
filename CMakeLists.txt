@@ -3,7 +3,7 @@
 # *****************************************************
 cmake_minimum_required(VERSION 3.15)
 
-set(VERSION 4.2.0)
+set(VERSION 5.0.0)
 
 project(queueutil
 	VERSION ${VERSION}
