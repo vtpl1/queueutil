@@ -72,6 +72,9 @@ auto RawBuffer::capacity() const -> size_t { return _buffer_capacity; }
 
 auto RawBuffer::assign(const uint8_t* data_in, size_t valid_data_size) -> void {
   resize(valid_data_size);
+  if (data_in == nullptr) {
+    return;
+  }
   std::memcpy(_buffer.get(), data_in, valid_data_size);
 }
 
