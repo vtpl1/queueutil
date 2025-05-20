@@ -11,8 +11,9 @@
 #include <stdexcept>
 
 constexpr int MEMORY_ALIGNMENT = 32;
+constexpr int KB_600           = (1024 * 1024);
 
-RawBuffer::RawBuffer(bool resize_always) : RawBuffer(nullptr, 0, resize_always) {}
+RawBuffer::RawBuffer(bool resize_always) : RawBuffer(nullptr, KB_600, resize_always) {}
 
 RawBuffer::RawBuffer(const uint8_t* data_in, size_t valid_data_size, bool resize_always)
     : _resize_always(resize_always) {
