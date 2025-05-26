@@ -82,7 +82,15 @@
         "any": "cpp",
         "__tree": "cpp",
         "forward_list": "cpp",
-        "print": "cpp"
+        "print": "cpp",
+        "list": "cpp",
+        "format": "cpp",
+        "filesystem": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "numbers": "cpp",
+        "semaphore": "cpp",
+        "stop_token": "cpp"
     },
 
 }

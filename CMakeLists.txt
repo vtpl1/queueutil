@@ -63,16 +63,16 @@ add_library(${PROJECT_NAME}::${COMPONENT1} ALIAS ${COMPONENT1})
 configure_file(inc/version.h.in version.h)
 
 # These tests can use the Catch2-provided main
-# add_executable(tests
+# add_executable(tests_queueutil
 # 	test/tests.cpp
 # )
 
-# target_link_libraries(tests
+# target_link_libraries(tests_queueutil
 # 	PRIVATE Catch2::Catch2WithMain
 # 	PRIVATE queueutil
 # )
 
-# target_compile_definitions(tests
+# target_compile_definitions(tests_queueutil
 # 	PRIVATE QUEUEUTIL_STATIC_DEFINE
 # )
 

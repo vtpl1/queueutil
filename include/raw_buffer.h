@@ -5,6 +5,7 @@
 #pragma once
 #ifndef raw_buffer_h
 #define raw_buffer_h
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -22,7 +23,7 @@ private:
 public:
   RawBuffer(bool resize_always = false);
   RawBuffer(const uint8_t* data_in, size_t valid_data_size, bool resize_always = false);
-  ~RawBuffer() = default;
+  ~RawBuffer();
   RawBuffer(const RawBuffer& o);
   RawBuffer& operator=(const RawBuffer& o);
   uint8_t*   data() const;
@@ -33,6 +34,21 @@ public:
   size_t     capacity() const;
   void       append(const uint8_t* data_in, size_t data_size);
   void       take(const uint8_t* data_in, size_t valid_data_size);
+};
+
+class QUEUEUTIL_EXPORT RawBufferMemoryAuditor {
+private:
+  RawBufferMemoryAuditor();
+  ~RawBufferMemoryAuditor() = default;
+  std::atomic_ullong total_memory{0};
+
+public:
+  static RawBufferMemoryAuditor& instance();
+  RawBufferMemoryAuditor(const RawBufferMemoryAuditor&)            = delete;
+  RawBufferMemoryAuditor& operator=(const RawBufferMemoryAuditor&) = delete;
+  unsigned long long GetTotalMemory();
+  void AddToTotalMemory(unsigned long long total_size);
+  void RemoveFromTotalMemory(unsigned long long total_size);
 };
 
 void QUEUEUTIL_EXPORT use_raw_buffer();

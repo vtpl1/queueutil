@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <iostream>
 #include <memory>
 #include <stdexcept>
 
@@ -20,14 +21,18 @@ RawBuffer::RawBuffer(const uint8_t* data_in, size_t valid_data_size, bool resize
   assign(data_in, valid_data_size);
 }
 
+RawBuffer::~RawBuffer() { RawBufferMemoryAuditor::instance().RemoveFromTotalMemory(_buffer_capacity); }
+
 void RawBuffer::resize(size_t new_size) {
   if (new_size > _buffer_capacity) {
+    RawBufferMemoryAuditor::instance().RemoveFromTotalMemory(_buffer_capacity);
     _buffer_capacity = new_size;
     _buffer_capacity = (_buffer_capacity % MEMORY_ALIGNMENT == 0)
                            ? _buffer_capacity
                            : ((_buffer_capacity / MEMORY_ALIGNMENT) * MEMORY_ALIGNMENT) + MEMORY_ALIGNMENT;
     // NOLINTNEXTLINE(hicpp-avoid-c-arrays,modernize-avoid-c-arrays,cppcoreguidelines-avoid-c-arrays)
     _buffer = std::make_unique<uint8_t[]>(_buffer_capacity);
+    RawBufferMemoryAuditor::instance().AddToTotalMemory(_buffer_capacity);
   }
   _buffer_size = new_size;
 }
@@ -86,4 +91,23 @@ auto RawBuffer::append(const uint8_t* data_in, size_t data_size) -> void {
   resize(temp_size + data_size);
   std::memcpy(_buffer.get(), temp_buff.data(), temp_size);
   std::memcpy(_buffer.get() + temp_size, data_in, data_size);
+}
+
+RawBufferMemoryAuditor::RawBufferMemoryAuditor() {}
+
+RawBufferMemoryAuditor& RawBufferMemoryAuditor::instance() {
+  static RawBufferMemoryAuditor s_instance;
+  return s_instance;
+}
+
+unsigned long long RawBufferMemoryAuditor::GetTotalMemory() { return total_memory.load(); }
+
+void RawBufferMemoryAuditor::AddToTotalMemory(unsigned long long total_size) {
+  total_memory.fetch_add(total_size);
+  std::cout << "+++ RawBufferMemoryAuditor Final size " << GetTotalMemory() << std::endl;
+}
+
+void RawBufferMemoryAuditor::RemoveFromTotalMemory(unsigned long long total_size) {
+  total_memory.fetch_sub(total_size);
+  std::cout << "--- RawBufferMemoryAuditor Final size " << GetTotalMemory() << std::endl;
 }
