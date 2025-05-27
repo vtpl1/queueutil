@@ -14,7 +14,7 @@
 constexpr int MEMORY_ALIGNMENT = 32;
 constexpr int KB_600           = (1024 * 1024);
 
-RawBuffer::RawBuffer(bool resize_always) : RawBuffer(nullptr, 0, resize_always) {}
+RawBuffer::RawBuffer(bool resize_always) : RawBuffer(nullptr, KB_600, resize_always) {}
 
 RawBuffer::RawBuffer(const uint8_t* data_in, size_t valid_data_size, bool resize_always)
     : _resize_always(resize_always) {
@@ -27,13 +27,9 @@ void RawBuffer::resize(size_t new_size) {
   if (new_size > _buffer_capacity) {
     RawBufferMemoryAuditor::instance().RemoveFromTotalMemory(_buffer_capacity);
     _buffer_capacity = new_size;
-    if (_buffer_capacity < KB_600) {
-      _buffer_capacity = KB_600;
-    }
     _buffer_capacity = (_buffer_capacity % MEMORY_ALIGNMENT == 0)
                            ? _buffer_capacity
                            : ((_buffer_capacity / MEMORY_ALIGNMENT) * MEMORY_ALIGNMENT) + MEMORY_ALIGNMENT;
-
     // NOLINTNEXTLINE(hicpp-avoid-c-arrays,modernize-avoid-c-arrays,cppcoreguidelines-avoid-c-arrays)
     _buffer = std::make_unique<uint8_t[]>(_buffer_capacity);
     RawBufferMemoryAuditor::instance().AddToTotalMemory(_buffer_capacity);
@@ -90,10 +86,11 @@ auto RawBuffer::assign(const uint8_t* data_in, size_t valid_data_size) -> void {
 auto RawBuffer::take(const uint8_t* data_in, size_t valid_data_size) -> void { assign(data_in, valid_data_size); }
 
 auto RawBuffer::append(const uint8_t* data_in, size_t data_size) -> void {
-  RawBuffer         temp_buff(data(), size());
   const std::size_t temp_size = size();
+  std::unique_ptr<uint8_t[]> temp_buff = std::make_unique<uint8_t[]>(temp_size);
+  std::memcpy(temp_buff.get(), data(), temp_size);
   resize(temp_size + data_size);
-  std::memcpy(_buffer.get(), temp_buff.data(), temp_size);
+  std::memcpy(_buffer.get(), temp_buff.get(), temp_size);
   std::memcpy(_buffer.get() + temp_size, data_in, data_size);
 }
 
