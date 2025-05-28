@@ -131,12 +131,12 @@ unsigned long long RawBufferMemoryAuditor::GetTotalMemory() const { return total
 
 void RawBufferMemoryAuditor::AddToTotalMemory(unsigned long long total_size) {
   total_memory.fetch_add(total_size);
-  std::cout << "+++ RawBufferMemoryAuditor Final size " << GetTotalMemory() << std::endl;
+  // std::cout << "+++ RawBufferMemoryAuditor Final size " << GetTotalMemory() << std::endl;
 }
 
 void RawBufferMemoryAuditor::RemoveFromTotalMemory(unsigned long long total_size) {
   // if (total_memory.load() > 0) {
   total_memory.fetch_sub(total_size);
-  std::cout << "--- RawBufferMemoryAuditor Final size " << GetTotalMemory() << std::endl;
+  // std::cout << "--- RawBufferMemoryAuditor Final size " << GetTotalMemory() << std::endl;
   // }
 }
