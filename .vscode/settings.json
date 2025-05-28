@@ -1,12 +1,18 @@
 {
-    "cmake.configureOnOpen": false,
     "files.trimTrailingWhitespace": true,
     "files.trimFinalNewlines": true,
     "cmake.buildDirectory": "${workspaceFolder}/build",
+    "cmake.environment": {
+        "VCPKG_BINARY_SOURCES": "clear;files,${workspaceFolder}/../thirdparty/vcpkg-cache,readwrite",
+        "X_VCPKG_ASSET_SOURCES": "x-azurl,file:///${workspaceFolder}/../thirdparty/vcpkg-asset-sources,,readwrite",
+        "X_VCPKG_REGISTRIES_CACHE": "${workspaceFolder}/../thirdparty/vcpkg-registries",
+        "VCPKG_DOWNLOADS": "${workspaceFolder}/../thirdparty/vcpkg-downloads",
+        // "VCPKG_DEFAULT_BINARY_CACHE": "${workspaceFolder}/../thirdparty/vcpkg-binary-cache"
+    },
     "cmake.configureSettings": {
+        // "VCPKG_OVERLAY_TRIPLETS": "${workspaceFolder}",
+        // "VCPKG_TARGET_TRIPLET": "x64-mixed",
         "CMAKE_TOOLCHAIN_FILE": "${workspaceFolder}/../thirdparty/vcpkg/scripts/buildsystems/vcpkg.cmake",
-        "CMAKE_C_COMPILER_LAUNCHER": "ccache",
-        "CMAKE_CXX_COMPILER_LAUNCHER": "ccache"
     },
     "cmake.options.statusBarVisibility": "visible",
     "files.associations": {

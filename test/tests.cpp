@@ -10,23 +10,23 @@
 #include "queue_manager.h"
 
 TEST_CASE("queue_manager", "[queue]") {
+
   std::string pub_key = "pub[siteId:0,channelId:0,appId:-1,liveOrRec:1,streamType:0,startTs:-1]uuid:0";
   std::string sub_key = "sub[siteId:0,channelId:0,appId:-1,liveOrRec:1,streamType:0,startTs:-1]uuid:0";
 
-  auto queue  = QueueManager<RawBuffer, 2>::get_queue(pub_key);
-  auto queue1 = QueueManager<RawBuffer, 2>::get_queue(sub_key);
+  {
+    auto queue  = QueueManager<RawBuffer, 2>::get_queue(pub_key);
+    auto queue1 = QueueManager<RawBuffer, 2>::get_queue(sub_key);
 
-  auto keys = QueueManager<RawBuffer, 2>::get_keys();
+    auto keys = QueueManager<RawBuffer, 2>::get_keys();
 
-  for (auto&& key : keys) {
-    std::cout << key << "\n";
+    for (auto&& key : keys) {
+      std::cout << key << "\n";
+      QueueManager<RawBuffer, 2>::remove_queue(key);
+    }
   }
 
-  auto keys1 = QueueManager<RawBuffer, 2>::get_keys("sub");
-
-  for (auto&& key : keys1) {
-    std::cout << key << "\n";
-  }
+  REQUIRE(RawBufferMemoryAuditor::instance().GetTotalMemory() == 0);
 }
 
 TEST_CASE("test_basic_allocation", "[queue]") {
@@ -68,4 +68,3 @@ TEST_CASE("test_memory_auditor", "[queue]") {
   }
   REQUIRE(RawBufferMemoryAuditor::instance().GetTotalMemory() == initial_mem);
 }
-

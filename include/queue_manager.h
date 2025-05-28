@@ -29,41 +29,25 @@ private:
   }
 
   std::shared_ptr<buffer_queue<T, size>> get_queue_(std::string key) {
-    try {
-      std::lock_guard<std::mutex> lock(mutex_);
-      if (queue_map_.find(key) == queue_map_.end()) {
-        queue_map_.emplace(key, std::make_shared<buffer_queue<T, size>>());
-      }
-
-      return queue_map_.at(key);
-    } catch (const std::runtime_error& e) {
-      std::cout << e.what() << '\n';
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (queue_map_.find(key) == queue_map_.end()) {
+      queue_map_.emplace(key, std::make_shared<buffer_queue<T, size>>());
     }
-    return nullptr;
+    return queue_map_.at(key);
   }
 
   std::shared_ptr<buffer_queue<T, size>> get_queue_if_exists_(std::string key) {
-    try {
-      std::lock_guard<std::mutex> lock(mutex_);
-      if (queue_map_.find(key) != queue_map_.end()) {
-        return queue_map_.at(key);
-      }
-    } catch (const std::runtime_error& e) {
-      std::cout << e.what() << '\n';
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (queue_map_.find(key) != queue_map_.end()) {
+      return queue_map_.at(key);
     }
     return nullptr;
   }
 
   bool remove_queue_(std::string key) {
-    try {
-      std::lock_guard<std::mutex> lock(mutex_);
-      queue_map_.erase(key);
-
-      return true;
-    } catch (const std::runtime_error& e) {
-      std::cout << e.what() << '\n';
-    }
-    return false;
+    std::lock_guard<std::mutex> lock(mutex_);
+    queue_map_.erase(key);
+    return true;
   }
 
   uint64_t get_src_uuid_() { return 0; }
@@ -72,28 +56,28 @@ private:
 
   std::vector<std::string> get_keys_(std::string type) {
     std::vector<std::string> keys;
-    try {
-      std::lock_guard<std::mutex> lock(mutex_);
-      for (auto&& itr : queue_map_) {
-        std::string key = itr.first;
-        if (type == std::string("")) {
+
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (auto&& itr : queue_map_) {
+      std::string key = itr.first;
+      if (type == std::string("")) {
+        keys.emplace_back(key);
+      } else {
+        if (absl::StartsWithIgnoreCase(key, type)) {
           keys.emplace_back(key);
-        } else {
-          if (absl::StartsWithIgnoreCase(key, type)) {
-            keys.emplace_back(key);
-          }
         }
       }
-    } catch (const std::runtime_error& e) {
-      std::cout << e.what() << '\n';
     }
-
     return keys;
   }
 
 public:
   QueueManager() { std::cout << "QueueManager ctor\n"; };
-  ~QueueManager() { std::cout << "QueueManager dtor\n"; };
+  ~QueueManager() {
+    std::lock_guard<std::mutex> lock(mutex_);
+    queue_map_.clear();
+    std::cout << "QueueManager dtor\n";
+  };
 
   QueueManager(QueueManager const&)   = delete;
   void operator=(QueueManager const&) = delete;
