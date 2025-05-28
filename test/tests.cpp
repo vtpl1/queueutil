@@ -28,3 +28,44 @@ TEST_CASE("queue_manager", "[queue]") {
     std::cout << key << "\n";
   }
 }
+
+TEST_CASE("test_basic_allocation", "[queue]") {
+  RawBuffer buf(1024);
+  REQUIRE(buf.size() == 1024);
+  REQUIRE(buf.capacity() >= 1024);
+}
+
+TEST_CASE("test_assignment_and_copy", "[queue]") {
+  uint8_t   data[] = {1, 2, 3, 4};
+  RawBuffer buf1(data, 4);
+  RawBuffer buf2 = buf1;
+  REQUIRE(std::memcmp(buf1.data(), buf2.data(), 4) == 0);
+}
+
+TEST_CASE("test_move_semantics", "[queue]") {
+  RawBuffer buf1(512);
+  uint8_t*  original_data = buf1.data();
+  RawBuffer buf2          = std::move(buf1);
+  REQUIRE(buf2.data() == original_data);
+  REQUIRE(buf1.data() == nullptr);
+}
+
+TEST_CASE("test_append_and_resize", "[queue]") {
+  RawBuffer buf;
+  uint8_t   part1[] = {1, 2, 3};
+  uint8_t   part2[] = {4, 5};
+  buf.take(part1, 3);
+  buf.append(part2, 2);
+  REQUIRE(buf.size() == 5);
+  REQUIRE(std::memcmp(buf.data(), "\x01\x02\x03\x04\x05", 5) == 0);
+}
+
+TEST_CASE("test_memory_auditor", "[queue]") {
+  auto initial_mem = RawBufferMemoryAuditor::instance().GetTotalMemory();
+  {
+    RawBuffer b(1024);
+    REQUIRE(RawBufferMemoryAuditor::instance().GetTotalMemory() >= initial_mem + 1024);
+  }
+  REQUIRE(RawBufferMemoryAuditor::instance().GetTotalMemory() == initial_mem);
+}
+

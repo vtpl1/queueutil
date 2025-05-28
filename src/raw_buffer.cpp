@@ -12,103 +12,131 @@
 #include <stdexcept>
 
 constexpr int MEMORY_ALIGNMENT = 32;
-constexpr int KB_600           = (1024 * 1024);
 
-RawBuffer::RawBuffer(bool resize_always) : RawBuffer(nullptr, KB_600, resize_always) {}
+RawBuffer::RawBuffer(size_t initial_size) : RawBuffer(nullptr, initial_size) {}
 
-RawBuffer::RawBuffer(const uint8_t* data_in, size_t valid_data_size, bool resize_always)
-    : _resize_always(resize_always) {
-  assign(data_in, valid_data_size);
+RawBuffer::RawBuffer(const uint8_t* data_in, size_t valid_data_size) { assign(data_in, valid_data_size); }
+
+RawBuffer::~RawBuffer() { release(); }
+
+RawBuffer::RawBuffer(const RawBuffer& other) { assign(other.data(), other.size()); }
+
+RawBuffer& RawBuffer::operator=(const RawBuffer& other) {
+  if (this != &other) {
+    assign(other.data(), other.size());
+  }
+  return *this;
 }
 
-RawBuffer::~RawBuffer() { RawBufferMemoryAuditor::instance().RemoveFromTotalMemory(_buffer_capacity); }
+RawBuffer::RawBuffer(RawBuffer&& other) noexcept
+    : _buffer(std::move(other._buffer)), _buffer_capacity(other._buffer_capacity), _buffer_size(other._buffer_size) {
+  other._buffer_capacity = 0;
+  other._buffer_size     = 0;
+}
+
+RawBuffer& RawBuffer::operator=(RawBuffer&& other) noexcept {
+  if (this != &other) {
+    release(); // Free existing memory before stealing
+    _buffer          = std::move(other._buffer);
+    _buffer_capacity = other._buffer_capacity;
+    _buffer_size     = other._buffer_size;
+
+    other._buffer_capacity = 0;
+    other._buffer_size     = 0;
+  }
+  return *this;
+}
 
 void RawBuffer::resize(size_t new_size) {
   if (new_size > _buffer_capacity) {
-    RawBufferMemoryAuditor::instance().RemoveFromTotalMemory(_buffer_capacity);
-    _buffer_capacity = new_size;
-    _buffer_capacity = (_buffer_capacity % MEMORY_ALIGNMENT == 0)
-                           ? _buffer_capacity
-                           : ((_buffer_capacity / MEMORY_ALIGNMENT) * MEMORY_ALIGNMENT) + MEMORY_ALIGNMENT;
-    // NOLINTNEXTLINE(hicpp-avoid-c-arrays,modernize-avoid-c-arrays,cppcoreguidelines-avoid-c-arrays)
-    _buffer = std::make_unique<uint8_t[]>(_buffer_capacity);
+    release();
+    size_t aligned_size = (new_size + MEMORY_ALIGNMENT - 1) & ~(MEMORY_ALIGNMENT - 1);
+    _buffer             = std::make_unique<uint8_t[]>(aligned_size);
+    _buffer_capacity    = aligned_size;
     RawBufferMemoryAuditor::instance().AddToTotalMemory(_buffer_capacity);
   }
   _buffer_size = new_size;
 }
 
-RawBuffer::RawBuffer(const RawBuffer& other) { assign(other.data(), other.size()); }
-
-auto RawBuffer::operator=(const RawBuffer& other) -> RawBuffer& {
-  if (this == &other) {
-    return *this;
-  }
-  assign(other.data(), other.size());
-  return *this;
-}
-
-auto RawBuffer::data() const -> uint8_t* {
-  if (_buffer_size == 0) {
-    return nullptr;
-  }
-  return _buffer.get();
-}
-
-auto RawBuffer::data(size_t offset) const -> uint8_t* {
-  if (_buffer_size == 0) {
-    return nullptr;
-  }
-  if (offset >= size()) {
-    throw std::runtime_error("reading outside of memory boundary");
-  }
-  return (_buffer.get() + offset);
-}
-
-auto RawBuffer::end() const -> uint8_t* {
-  if (_buffer_size == 0) {
-    return nullptr;
-  }
-  return (_buffer.get() + _buffer_size);
-}
-
-auto RawBuffer::size() const -> size_t { return _buffer_size; }
-
-auto RawBuffer::capacity() const -> size_t { return _buffer_capacity; }
-
-auto RawBuffer::assign(const uint8_t* data_in, size_t valid_data_size) -> void {
-  resize(valid_data_size);
-  if (data_in == nullptr) {
+void RawBuffer::resizeAndPreserve(size_t new_size) {
+  if (new_size <= _buffer_capacity) {
+    _buffer_size = new_size;
     return;
   }
-  std::memcpy(_buffer.get(), data_in, valid_data_size);
+
+  auto                       new_capacity = (new_size + MEMORY_ALIGNMENT - 1) & ~(MEMORY_ALIGNMENT - 1);
+  std::unique_ptr<uint8_t[]> new_buffer   = std::make_unique<uint8_t[]>(new_capacity);
+
+  if (_buffer && _buffer_size > 0) {
+    std::memcpy(new_buffer.get(), _buffer.get(), _buffer_size);
+  }
+
+  release(); // remove old memory from auditor
+  _buffer          = std::move(new_buffer);
+  _buffer_capacity = new_capacity;
+  RawBufferMemoryAuditor::instance().AddToTotalMemory(_buffer_capacity);
+
+  _buffer_size = new_size;
 }
 
-auto RawBuffer::take(const uint8_t* data_in, size_t valid_data_size) -> void { assign(data_in, valid_data_size); }
-
-auto RawBuffer::append(const uint8_t* data_in, size_t data_size) -> void {
-  const std::size_t temp_size = size();
-  std::unique_ptr<uint8_t[]> temp_buff = std::make_unique<uint8_t[]>(temp_size);
-  std::memcpy(temp_buff.get(), data(), temp_size);
-  resize(temp_size + data_size);
-  std::memcpy(_buffer.get(), temp_buff.get(), temp_size);
-  std::memcpy(_buffer.get() + temp_size, data_in, data_size);
+void RawBuffer::release() {
+  if (_buffer) {
+    RawBufferMemoryAuditor::instance().RemoveFromTotalMemory(_buffer_capacity);
+    // _buffer.reset();
+    _buffer = nullptr;
+  }
+  _buffer_capacity = 0;
+  _buffer_size     = 0;
 }
 
-RawBufferMemoryAuditor::RawBufferMemoryAuditor() {}
+void RawBuffer::assign(const uint8_t* data_in, size_t valid_data_size) {
+  resize(valid_data_size);
+  if (data_in) {
+    std::memcpy(_buffer.get(), data_in, valid_data_size);
+  }
+}
+
+uint8_t* RawBuffer::data() const { return (_buffer_size > 0) ? _buffer.get() : nullptr; }
+
+uint8_t* RawBuffer::end() const { return (_buffer_size > 0) ? _buffer.get() + _buffer_size : nullptr; }
+
+uint8_t* RawBuffer::data(size_t offset) const {
+  if (offset >= _buffer_size) {
+    throw std::runtime_error("Offset out of bounds");
+  }
+  return _buffer.get() + offset;
+}
+
+void RawBuffer::append(const uint8_t* data_in, size_t data_size) {
+  if (data_size == 0)
+    return;
+  size_t old_size = _buffer_size;
+  resizeAndPreserve(_buffer_size + data_size);
+  std::memcpy(_buffer.get() + old_size, data_in, data_size);
+}
+
+void RawBuffer::take(const uint8_t* data_in, size_t valid_data_size) { assign(data_in, valid_data_size); }
+
+void RawBuffer::clear() { _buffer_size = 0; }
+
+size_t RawBuffer::size() const { return _buffer_size; }
+size_t RawBuffer::capacity() const { return _buffer_capacity; }
 
 RawBufferMemoryAuditor& RawBufferMemoryAuditor::instance() {
   static RawBufferMemoryAuditor s_instance;
   return s_instance;
 }
 
-unsigned long long RawBufferMemoryAuditor::GetTotalMemory() { return total_memory.load(); }
+unsigned long long RawBufferMemoryAuditor::GetTotalMemory() const { return total_memory.load(); }
 
 void RawBufferMemoryAuditor::AddToTotalMemory(unsigned long long total_size) {
   total_memory.fetch_add(total_size);
-  // std::cout << "+++ RawBufferMemoryAuditor Final size " << GetTotalMemory() << std::endl;
+  std::cout << "+++ RawBufferMemoryAuditor Final size " << GetTotalMemory() << std::endl;
 }
 
 void RawBufferMemoryAuditor::RemoveFromTotalMemory(unsigned long long total_size) {
+  // if (total_memory.load() > 0) {
   total_memory.fetch_sub(total_size);
-  // std::cout << "--- RawBufferMemoryAuditor Final size " << GetTotalMemory() << std::endl;
+  std::cout << "--- RawBufferMemoryAuditor Final size " << GetTotalMemory() << std::endl;
+  // }
 }
