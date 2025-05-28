@@ -1,6 +1,6 @@
 {
   "name": "queueutil",
-  "version": "5.4.0",
+  "version": "6.0.0",
   "description": "Queue util",
   "homepage": "http://github.com/queueutil",
   "dependencies": [
