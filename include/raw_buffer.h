@@ -23,7 +23,7 @@ private:
   void                       release();
 
 public:
-  RawBuffer(size_t initial_size = KB_600);
+  RawBuffer(size_t initial_size = 0);
   RawBuffer(const uint8_t* data_in, size_t valid_data_size);
   ~RawBuffer();
 
