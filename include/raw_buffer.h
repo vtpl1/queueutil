@@ -12,7 +12,7 @@
 #include <queueutil_export.h>
 #include <vector>
 
-constexpr int KB_600 = (1024 * 1024);
+constexpr int KB_300 = (300 * 1024);
 
 class QUEUEUTIL_EXPORT RawBuffer {
 private:
