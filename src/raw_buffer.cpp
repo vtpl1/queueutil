@@ -34,7 +34,7 @@ RawBuffer::RawBuffer(RawBuffer&& other) noexcept
   other.buffer_capacity_  = 0;
   other.buffer_size_      = 0;
   other.initial_capacity_ = 0;
-  other.plus_minus_     = 0;
+  other.plus_minus_       = 0;
 }
 
 RawBuffer& RawBuffer::operator=(RawBuffer&& other) noexcept {
@@ -44,96 +44,105 @@ RawBuffer& RawBuffer::operator=(RawBuffer&& other) noexcept {
     buffer_capacity_  = other.buffer_capacity_;
     buffer_size_      = other.buffer_size_;
     initial_capacity_ = other.initial_capacity_;
-    plus_minus_     = other.plus_minus_;
+    plus_minus_       = other.plus_minus_;
 
     other.buffer_capacity_  = 0;
     other.buffer_size_      = 0;
     other.initial_capacity_ = 0;
-    other.plus_minus_     = 0;
+    other.plus_minus_       = 0;
   }
 
   return *this;
 }
 
 void RawBuffer::resize(size_t new_size) {
-  bool resize_required = false;
-  if (new_size >= initial_capacity_) {
-    plus_minus_ += 6;
-  }
-  plus_minus_ -= 1;
-  if (plus_minus_ < 0) {
-    resize_required = true;
-  }
-  if (new_size > buffer_capacity_) {
-    resize_required = true;
-  }
-
-  auto aligned_size = (std::max(new_size, initial_capacity_) + MEMORY_ALIGNMENT - 1) & ~(MEMORY_ALIGNMENT - 1);
-  if (aligned_size == buffer_capacity_) {
-    resize_required = false;
-  }
-
-  if (resize_required) {
-
-    if (initial_capacity_ == 0) {
-      initial_capacity_ = aligned_size;
+  if (new_size > 0) {
+    bool resize_required = false;
+    if (new_size >= initial_capacity_) {
+      plus_minus_ += 50;
     }
-    if (buffer_capacity_ > 0) {
-      if (aligned_size > buffer_capacity_) {
-        std::cout << "+++ resizing up  : from: " << buffer_capacity_ << " to: " << aligned_size << std::endl;
-      } else {
-        std::cout << "--- resizing down: from: " << buffer_capacity_ << " to: " << aligned_size << std::endl;
+    plus_minus_ -= 1;
+    if (plus_minus_ < 0) {
+      plus_minus_     = 0;
+      resize_required = true;
+    }
+    if (new_size > buffer_capacity_) {
+      resize_required = true;
+    }
+
+    auto aligned_size = (std::max(new_size, initial_capacity_) + MEMORY_ALIGNMENT - 1) & ~(MEMORY_ALIGNMENT - 1);
+    if (aligned_size == buffer_capacity_) {
+      resize_required = false;
+    }
+
+    if (resize_required) {
+
+      if (initial_capacity_ == 0) {
+        initial_capacity_ = aligned_size;
       }
-    }
-    release(); // remove old memory from auditor
-    buffer_          = std::make_unique<uint8_t[]>(aligned_size);
-    buffer_capacity_ = aligned_size;
-    RawBufferMemoryAuditor::instance().AddToTotalMemory(buffer_capacity_);
-  }
+      if (buffer_capacity_ > 0) {
+        if (aligned_size > buffer_capacity_) {
+          // std::cout << "+++ resizing up  : from: " << buffer_capacity_ << " to: " << aligned_size
+          //           << std::endl;
+        } else {
+          std::cout << "--- resizing down: from: " << buffer_capacity_ << " to: " << aligned_size
+                    << std::endl;
+        }
+      }
 
+      release(); // remove old memory from auditor
+      buffer_          = std::make_unique<uint8_t[]>(aligned_size);
+      buffer_capacity_ = aligned_size;
+      RawBufferMemoryAuditor::instance().AddToTotalMemory(buffer_capacity_);
+    }
+  }
   buffer_size_ = new_size;
 }
 
 void RawBuffer::resizeAndPreserve(size_t new_size) {
-  bool resize_required = false;
-  if (new_size >= initial_capacity_) {
-    plus_minus_ += 6;
-  }
-  plus_minus_ -= 1;
-  if (plus_minus_ < 0) {
-    resize_required = true;
-  }
-  if (new_size > buffer_capacity_) {
-    resize_required = true;
-  }
-  auto aligned_size = (std::max(new_size, initial_capacity_) + MEMORY_ALIGNMENT - 1) & ~(MEMORY_ALIGNMENT - 1);
-  if (aligned_size == buffer_capacity_) {
-    resize_required = false;
-  }
-
-  if (resize_required) {
-    if (initial_capacity_ == 0) {
-      initial_capacity_ = aligned_size;
+  if (new_size > 0) {
+    bool resize_required = false;
+    if (new_size >= initial_capacity_) {
+      plus_minus_ += 50;
     }
-    if (buffer_capacity_ > 0) {
-      if (aligned_size > buffer_capacity_) {
-        std::cout << "+++ resizing up  : from: " << buffer_capacity_ << " to: " << aligned_size << std::endl;
-      } else {
-        std::cout << "--- resizing down: from: " << buffer_capacity_ << " to: " << aligned_size << std::endl;
+    plus_minus_ -= 1;
+    if (plus_minus_ < 0) {
+      plus_minus_     = 0;
+      resize_required = true;
+    }
+    if (new_size > buffer_capacity_) {
+      resize_required = true;
+    }
+    auto aligned_size = (std::max(new_size, initial_capacity_) + MEMORY_ALIGNMENT - 1) & ~(MEMORY_ALIGNMENT - 1);
+    if (aligned_size == buffer_capacity_) {
+      resize_required = false;
+    }
+
+    if (resize_required) {
+      if (initial_capacity_ == 0) {
+        initial_capacity_ = aligned_size;
       }
-    }
-    std::unique_ptr<uint8_t[]> new_buffer = std::make_unique<uint8_t[]>(aligned_size);
+      if (buffer_capacity_ > 0) {
+        if (aligned_size > buffer_capacity_) {
+          // std::cout << "+++ resizeAndPreserve up  : from: " << buffer_capacity_
+          //           << " to: " << aligned_size << std::endl;
+        } else {
+          std::cout << "--- resizeAndPreserve down: from: " << buffer_capacity_
+                    << " to: " << aligned_size << std::endl;
+        }
+      }
+      std::unique_ptr<uint8_t[]> new_buffer = std::make_unique<uint8_t[]>(aligned_size);
 
-    if (buffer_ && buffer_size_ > 0) {
-      std::memcpy(new_buffer.get(), buffer_.get(), std::min(buffer_size_, new_size));
-    }
+      if (buffer_ && buffer_size_ > 0) {
+        std::memcpy(new_buffer.get(), buffer_.get(), std::min(buffer_size_, new_size));
+      }
 
-    release(); // remove old memory from auditor
-    buffer_          = std::move(new_buffer);
-    buffer_capacity_ = aligned_size;
-    RawBufferMemoryAuditor::instance().AddToTotalMemory(buffer_capacity_);
+      release(); // remove old memory from auditor
+      buffer_          = std::move(new_buffer);
+      buffer_capacity_ = aligned_size;
+      RawBufferMemoryAuditor::instance().AddToTotalMemory(buffer_capacity_);
+    }
   }
-
   buffer_size_ = new_size;
 }
 
