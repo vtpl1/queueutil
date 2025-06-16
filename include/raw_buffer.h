@@ -16,9 +16,11 @@ constexpr int KB_300 = (300 * 1024);
 
 class QUEUEUTIL_EXPORT RawBuffer {
 private:
-  std::unique_ptr<uint8_t[]> _buffer;
-  size_t                     _buffer_capacity{0};
-  size_t                     _buffer_size{0};
+  std::unique_ptr<uint8_t[]> buffer_;
+  size_t                     buffer_capacity_{0};
+  size_t                     buffer_size_{0};
+  size_t                     initial_size_demand_{0};
+  int64_t                    plus2_minus1_{0};
   void                       assign(const uint8_t* data_in, size_t valid_data_size);
   void                       release();
 
