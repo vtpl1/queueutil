@@ -68,3 +68,62 @@ TEST_CASE("test_memory_auditor", "[queue]") {
   }
   REQUIRE(RawBufferMemoryAuditor::instance().GetTotalMemory() == initial_mem);
 }
+
+TEST_CASE("test_reset_raw_buffer", "[queue]") {
+  auto initial_mem = RawBufferMemoryAuditor::instance().GetTotalMemory();
+  {
+    std::unique_ptr<RawBuffer> b(new RawBuffer(1024));
+    REQUIRE(RawBufferMemoryAuditor::instance().GetTotalMemory() == initial_mem + 1024);
+    {
+      std::unique_ptr<RawBuffer> b1(new RawBuffer(1025));
+      *b = *b1;
+    }
+    REQUIRE(RawBufferMemoryAuditor::instance().GetTotalMemory() == initial_mem + 1056);
+    {
+      std::unique_ptr<RawBuffer> b1(new RawBuffer(1025));
+      *b = *b1;
+    }
+    REQUIRE(RawBufferMemoryAuditor::instance().GetTotalMemory() == initial_mem + 1056);
+    {
+      auto b1 = std::make_unique<RawBuffer>(1025);
+      *b      = *b1;
+    }
+    REQUIRE(RawBufferMemoryAuditor::instance().GetTotalMemory() == initial_mem + 1056);
+    {
+      std::unique_ptr<RawBuffer> b1(new RawBuffer(1024));
+      *b = *b1;
+    }
+    REQUIRE(RawBufferMemoryAuditor::instance().GetTotalMemory() == initial_mem + 1056);
+    {
+      auto b1 = std::make_unique<RawBuffer>(1023);
+      *b      = *b1;
+    }
+    REQUIRE(RawBufferMemoryAuditor::instance().GetTotalMemory() == initial_mem + 1056);
+    {
+      auto b1 = std::make_unique<RawBuffer>(1023);
+      *b      = *b1;
+    }
+    REQUIRE(RawBufferMemoryAuditor::instance().GetTotalMemory() == initial_mem + 1056);
+    {
+      auto b1 = std::make_unique<RawBuffer>(1023);
+      *b      = *b1;
+    }
+    REQUIRE(RawBufferMemoryAuditor::instance().GetTotalMemory() == initial_mem + 1056);
+    {
+      auto b1 = std::make_unique<RawBuffer>(1023);
+      *b      = *b1;
+    }
+    REQUIRE(RawBufferMemoryAuditor::instance().GetTotalMemory() == initial_mem + 1056);
+    {
+      auto b1 = std::make_unique<RawBuffer>(1023);
+      *b      = *b1;
+    }
+    REQUIRE(RawBufferMemoryAuditor::instance().GetTotalMemory() == initial_mem + 1056);
+    {
+      auto b1 = std::make_unique<RawBuffer>(1023);
+      *b      = *b1;
+    }
+    REQUIRE(RawBufferMemoryAuditor::instance().GetTotalMemory() == initial_mem + 1024);
+  }
+  REQUIRE(RawBufferMemoryAuditor::instance().GetTotalMemory() == initial_mem);
+}
