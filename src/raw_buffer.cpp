@@ -51,37 +51,51 @@ RawBuffer& RawBuffer::operator=(RawBuffer&& other) noexcept {
 }
 
 void RawBuffer::resize(size_t new_size) {
-  if (new_size <= buffer_capacity_) {
-    buffer_size_ = new_size;
-    return;
+  bool resize_required = false;
+  plus2_minus1_ -= 1;
+  if (new_size > buffer_capacity_) {
+    plus2_minus1_ += 2;
+    resize_required = true;
   }
-
-  release();
-  size_t aligned_size = (new_size + MEMORY_ALIGNMENT - 1) & ~(MEMORY_ALIGNMENT - 1);
-  buffer_             = std::make_unique<uint8_t[]>(aligned_size);
-  buffer_capacity_    = aligned_size;
-  RawBufferMemoryAuditor::instance().AddToTotalMemory(buffer_capacity_);
+  if (plus2_minus1_ <= 0) {
+    resize_required = true;
+  }
+  if (resize_required) {
+    auto proposed_capacity = std::max(new_size, initial_size_demand_);
+    release();
+    size_t aligned_size = (proposed_capacity + MEMORY_ALIGNMENT - 1) & ~(MEMORY_ALIGNMENT - 1);
+    buffer_             = std::make_unique<uint8_t[]>(aligned_size);
+    buffer_capacity_    = aligned_size;
+    RawBufferMemoryAuditor::instance().AddToTotalMemory(buffer_capacity_);
+  }
 
   buffer_size_ = new_size;
 }
 
 void RawBuffer::resizeAndPreserve(size_t new_size) {
-  if (new_size <= buffer_capacity_) {
-    buffer_size_ = new_size;
-    return;
+  bool resize_required = false;
+  plus2_minus1_ -= 1;
+  if (new_size > buffer_capacity_) {
+    plus2_minus1_ += 2;
+    resize_required = true;
   }
-
-  auto                       new_capacity = (new_size + MEMORY_ALIGNMENT - 1) & ~(MEMORY_ALIGNMENT - 1);
-  std::unique_ptr<uint8_t[]> new_buffer   = std::make_unique<uint8_t[]>(new_capacity);
-
-  if (buffer_ && buffer_size_ > 0) {
-    std::memcpy(new_buffer.get(), buffer_.get(), buffer_size_);
+  if (plus2_minus1_ <= 0) {
+    resize_required = true;
   }
+  if (resize_required) {
+    auto proposed_capacity = std::max(new_size, initial_size_demand_);
+    auto                       new_capacity      = (proposed_capacity + MEMORY_ALIGNMENT - 1) & ~(MEMORY_ALIGNMENT - 1);
+    std::unique_ptr<uint8_t[]> new_buffer        = std::make_unique<uint8_t[]>(new_capacity);
 
-  release(); // remove old memory from auditor
-  buffer_          = std::move(new_buffer);
-  buffer_capacity_ = new_capacity;
-  RawBufferMemoryAuditor::instance().AddToTotalMemory(buffer_capacity_);
+    if (buffer_ && buffer_size_ > 0) {
+      std::memcpy(new_buffer.get(), buffer_.get(), std::min(buffer_size_, new_size));
+    }
+
+    release(); // remove old memory from auditor
+    buffer_          = std::move(new_buffer);
+    buffer_capacity_ = new_capacity;
+    RawBufferMemoryAuditor::instance().AddToTotalMemory(buffer_capacity_);
+  }
 
   buffer_size_ = new_size;
 }
