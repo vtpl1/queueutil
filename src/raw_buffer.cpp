@@ -68,14 +68,12 @@ void RawBuffer::resize(size_t new_size) {
     resize_required = true;
   }
 
-  // if (buffer_capacity_ > 0) {
-  //   std::cout << "plus2_minus1: " << plus2_minus1_ << " initial_size_demand: " << initial_capacity_
-  //             << " buffer_capacity: " << buffer_capacity_ << " new_size: " << new_size
-  //             << " resize_requester: " << resize_requester << std::endl;
-  // }
+  auto aligned_size = (std::max(new_size, initial_capacity_) + MEMORY_ALIGNMENT - 1) & ~(MEMORY_ALIGNMENT - 1);
+  if (aligned_size == buffer_capacity_) {
+    resize_required = false;
+  }
+
   if (resize_required) {
-    auto proposed_capacity = std::max(new_size, initial_capacity_);
-    auto aligned_size      = (proposed_capacity + MEMORY_ALIGNMENT - 1) & ~(MEMORY_ALIGNMENT - 1);
 
     if (initial_capacity_ == 0) {
       initial_capacity_ = aligned_size;
@@ -108,10 +106,12 @@ void RawBuffer::resizeAndPreserve(size_t new_size) {
   if (new_size > buffer_capacity_) {
     resize_required = true;
   }
-  if (resize_required) {
-    auto proposed_capacity = std::max(new_size, initial_capacity_);
-    auto aligned_size      = (proposed_capacity + MEMORY_ALIGNMENT - 1) & ~(MEMORY_ALIGNMENT - 1);
+  auto aligned_size = (std::max(new_size, initial_capacity_) + MEMORY_ALIGNMENT - 1) & ~(MEMORY_ALIGNMENT - 1);
+  if (aligned_size == buffer_capacity_) {
+    resize_required = false;
+  }
 
+  if (resize_required) {
     if (initial_capacity_ == 0) {
       initial_capacity_ = aligned_size;
     }
