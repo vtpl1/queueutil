@@ -20,7 +20,7 @@ private:
   size_t                     buffer_capacity_{0};
   size_t                     buffer_size_{0};
   size_t                     initial_capacity_{0};
-  int64_t                    plus2_minus1_{0};
+  int64_t                    plus_minus_{0};
   void                       assign(const uint8_t* data_in, size_t valid_data_size);
   void                       release();
 

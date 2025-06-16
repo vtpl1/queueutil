@@ -30,11 +30,11 @@ RawBuffer& RawBuffer::operator=(const RawBuffer& other) {
 
 RawBuffer::RawBuffer(RawBuffer&& other) noexcept
     : buffer_(std::move(other.buffer_)), buffer_capacity_(other.buffer_capacity_), buffer_size_(other.buffer_size_),
-      initial_capacity_(other.initial_capacity_), plus2_minus1_(other.plus2_minus1_) {
+      initial_capacity_(other.initial_capacity_), plus_minus_(other.plus_minus_) {
   other.buffer_capacity_  = 0;
   other.buffer_size_      = 0;
   other.initial_capacity_ = 0;
-  other.plus2_minus1_     = 0;
+  other.plus_minus_     = 0;
 }
 
 RawBuffer& RawBuffer::operator=(RawBuffer&& other) noexcept {
@@ -44,12 +44,12 @@ RawBuffer& RawBuffer::operator=(RawBuffer&& other) noexcept {
     buffer_capacity_  = other.buffer_capacity_;
     buffer_size_      = other.buffer_size_;
     initial_capacity_ = other.initial_capacity_;
-    plus2_minus1_     = other.plus2_minus1_;
+    plus_minus_     = other.plus_minus_;
 
     other.buffer_capacity_  = 0;
     other.buffer_size_      = 0;
     other.initial_capacity_ = 0;
-    other.plus2_minus1_     = 0;
+    other.plus_minus_     = 0;
   }
 
   return *this;
@@ -58,10 +58,10 @@ RawBuffer& RawBuffer::operator=(RawBuffer&& other) noexcept {
 void RawBuffer::resize(size_t new_size) {
   bool resize_required = false;
   if (new_size >= initial_capacity_) {
-    plus2_minus1_ += 2;
+    plus_minus_ += 6;
   }
-  plus2_minus1_ -= 1;
-  if (plus2_minus1_ < 0) {
+  plus_minus_ -= 1;
+  if (plus_minus_ < 0) {
     resize_required = true;
   }
   if (new_size > buffer_capacity_) {
@@ -97,10 +97,10 @@ void RawBuffer::resize(size_t new_size) {
 void RawBuffer::resizeAndPreserve(size_t new_size) {
   bool resize_required = false;
   if (new_size >= initial_capacity_) {
-    plus2_minus1_ += 2;
+    plus_minus_ += 6;
   }
-  plus2_minus1_ -= 1;
-  if (plus2_minus1_ < 0) {
+  plus_minus_ -= 1;
+  if (plus_minus_ < 0) {
     resize_required = true;
   }
   if (new_size > buffer_capacity_) {
