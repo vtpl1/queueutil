@@ -96,7 +96,9 @@
         "concepts": "cpp",
         "numbers": "cpp",
         "semaphore": "cpp",
-        "stop_token": "cpp"
+        "stop_token": "cpp",
+        "span": "cpp",
+        "stack": "cpp"
     },
 
 }

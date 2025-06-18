@@ -40,7 +40,6 @@ public:
   uint8_t* data(size_t offset) const;
 
   void   resize(size_t new_size);
-  void   resizeAndPreserve(size_t new_size);
   void   clear();
   size_t size() const;
   size_t capacity() const;
