@@ -44,6 +44,18 @@ private:
     return nullptr;
   }
 
+  std::vector<std::shared_ptr<buffer_queue<T, size>>> get_queues_if_exists_(std::string key) {
+    std::vector<std::shared_ptr<buffer_queue<T, size>>> queues;
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (auto&& elem : queue_map_) {
+      if (absl::StartsWithIgnoreCase(elem.first, key)) {
+        queues.emplace_back(queue_map_.at(elem.first));
+      }
+    }
+
+    return queues;
+  }
+
   bool remove_queue_(std::string key) {
     std::lock_guard<std::mutex> lock(mutex_);
     queue_map_.erase(key);
@@ -86,6 +98,10 @@ public:
 
   static std::shared_ptr<buffer_queue<T, size>> get_queue_if_exists(std::string key) {
     return getInstance().get_queue_if_exists_(key);
+  }
+
+  static std::vector<std::shared_ptr<buffer_queue<T, size>>> get_queues_if_exists(std::string key) {
+    return getInstance().get_queues_if_exists_(key);
   }
 
   static bool remove_queue(std::string key) { return getInstance().remove_queue_(key); }
