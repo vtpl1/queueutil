@@ -59,7 +59,7 @@ void RawBuffer::resize(size_t new_size) {
   if (new_size > 0) {
     bool resize_required = false;
     if (new_size >= initial_capacity_) {
-      plus_minus_ += 50;
+      plus_minus_ += 2;
     }
     plus_minus_ -= 1;
     if (plus_minus_ < 0) {
