@@ -58,7 +58,7 @@ RawBuffer& RawBuffer::operator=(RawBuffer&& other) noexcept {
 void RawBuffer::resize(size_t new_size) {
   if (new_size > 0) {
     bool resize_required = false;
-    if (new_size >= initial_capacity_) {
+    if (new_size >= buffer_capacity_) {
       plus_minus_ += 2;
     }
     plus_minus_ -= 1;
